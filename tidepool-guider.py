@@ -4,18 +4,11 @@ from datetime import datetime
 import inquirer
 
 
-baseURL = "https://www.tide-forecast.com/locations/{}/tides/latest"
-locations = [
-    "Half-Moon-Bay-California", 
-    "Huntington-Beach", 
-    "Providence-Rhode-Island", 
-    "Wrightsville-Beach-North-Carolina"
-]
-
-def getTideData(requestedLocation):
+def getTideData(baseURL, requestedLocation):
     """
     Scrapes the website and gathers the data for daytime low tides
     Args:
+        baseURL (string): the base URL for the website to be scraped
         requestedLocation (string): the location the user wants to learn about
 
     Ret:
@@ -84,6 +77,7 @@ def printTides(allDaylightLowTides, requestedLocation, requestedDay):
     for day in allDaylightLowTides:
         if day["date"] == requestedDay:
             desiredDayData = day["lowTides"]
+            break
 
     print("For {} at {}:".format(requestedDay, requestedLocation))
     if desiredDayData:
@@ -91,14 +85,23 @@ def printTides(allDaylightLowTides, requestedLocation, requestedDay):
             print(lowTide["time"].strftime("%I:%M %p") + " at " + lowTide["height"])
     else:
         print("No low tides during daylight hours.")
+        
     print('\n')
 
 
 
 ############## Run the script ##############
 
+baseURL = "https://www.tide-forecast.com/locations/{}/tides/latest"
+locations = [
+    "Half-Moon-Bay-California",
+    "Huntington-Beach",
+    "Providence-Rhode-Island",
+    "Wrightsville-Beach-North-Carolina"
+]
+
 # get the location the user wants to examine
-locationQuestion = [ 
+locationQuestion = [
     inquirer.List('locationVal',
         message="For which location do you want to see the daytime low tides?",
         choices=locations
@@ -107,10 +110,10 @@ locationQuestion = [
 desiredLocation = inquirer.prompt(locationQuestion)
 
 # get the tide data
-daylightLowTides = getTideData(desiredLocation["locationVal"])
+daylightLowTides = getTideData(baseURL, desiredLocation["locationVal"])
 
 # get the day the user wants to examine
-dayQuestion = [ 
+dayQuestion = [
     inquirer.List('dayVal',
         message="For which day do you want to see the daytime low tides?",
         choices=[day["date"] for day in daylightLowTides]
